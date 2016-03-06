@@ -43,7 +43,7 @@ public class RecipeTable implements Callable<RecipeTable>{
                 if (recipes.containsKey(item) ) {
                     recipes.get(item).add(recipe);
                 }else{
-                    Set set = new HashSet<>(1);
+                    Set<Recipe> set = new HashSet<>(1);
                     set.add(recipe);
                     recipes.put(item, set);
                 }

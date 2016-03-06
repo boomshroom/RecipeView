@@ -1,23 +1,24 @@
 package boomshroom.recipeview.fallback;
 
 import com.flowpowered.math.vector.Vector2i;
+import net.minecraft.item.crafting.ShapedRecipes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.recipe.ShapedRecipe;
 
 import java.lang.reflect.Field;
 import java.util.Optional;
 
-public class FallbackShapedRecipe extends FallbackRecipe implements ShapedRecipe{
+public class FallbackShapedRecipe extends FallbackRecipe<ShapedRecipes> implements ShapedRecipe{
 
     private static Class c;
     private static Field recipeWidth;
     private static Field recipeHeight;
     private static Field recipeItems;
 
-    public FallbackShapedRecipe(Object wrapped) throws ClassNotFoundException{
+    public FallbackShapedRecipe(ShapedRecipes wrapped) {
         super(wrapped);
         if (c==null){
-            c = Class.forName("net.minecraft.item.crafting.ShapedRecipes");
+            c = ShapedRecipes.class;
             for (Field field: c.getDeclaredFields()) {
                 if (field.getName().equals("field_77576_b") || field.getName().equals("recipeWidth")){
                     field.setAccessible(true);

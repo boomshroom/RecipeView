@@ -1,7 +1,12 @@
 package boomshroom.recipeview.fallback;
 
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.ShapedRecipes;
+import net.minecraft.item.crafting.ShapelessRecipes;
 import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
+import org.spongepowered.api.item.recipe.ShapelessRecipe;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,33 +33,14 @@ public class FallbackRecipeRegistry implements RecipeRegistry{
     public Set<Recipe> getRecipes(){
         if (recipes == null) {
             recipes = new HashSet<>();
-            try {
-                Class managerClass = Class.forName("net.minecraft.item.crafting.CraftingManager");
-                Object manager;
-                try {
-                    manager = managerClass.getMethod("getInstance").invoke(null);
-                }catch(NoSuchMethodException e){
-                    manager = managerClass.getMethod("func_77594_a").invoke(null);
+            for (IRecipe irecipe : CraftingManager.getInstance().getRecipeList()) {
+                if (irecipe instanceof ShapedRecipes){
+                    recipes.add(new FallbackShapedRecipe((ShapedRecipes) irecipe));
+                }else if (irecipe instanceof ShapelessRecipe) {
+                    recipes.add(new FallbackShapelessRecipe((ShapelessRecipes)irecipe));
+                }else{
+                    recipes.add(new FallbackRecipe(irecipe));
                 }
-                Class iRecipeClass = Class.forName("net.minecraft.item.crafting.IRecipe");
-                Method getRecipeList;
-                try {
-                    getRecipeList = managerClass.getMethod("getRecipeList");
-                }catch(NoSuchMethodException e){
-                    getRecipeList = managerClass.getMethod("func_77592_b");
-                }
-                for (Object irecipe : (List<Object>) getRecipeList.invoke(manager)) {
-                    if (Class.forName("net.minecraft.item.crafting.ShapedRecipes").isInstance(irecipe)){
-                        recipes.add(new FallbackShapedRecipe(irecipe));
-                    }else if (Class.forName("net.minecraft.item.crafting.ShapelessRecipes").isInstance(irecipe)) {
-                        recipes.add(new FallbackShapelessRecipe(irecipe));
-                    }else{
-                        recipes.add(new FallbackRecipe(irecipe));
-                    }
-                }
-            }catch(ClassNotFoundException|NoSuchMethodException|IllegalAccessException|InvocationTargetException e){
-                e.printStackTrace();
-                return Collections.emptySet();
             }
         }
         return recipes;
