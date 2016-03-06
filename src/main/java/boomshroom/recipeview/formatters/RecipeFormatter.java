@@ -7,6 +7,6 @@ import java.util.Locale;
 
 public interface RecipeFormatter {
 
-    public Text formatRecipe(Recipe recipe, Locale locale);
+    Text formatRecipe(Recipe recipe, Locale locale);
 
 }

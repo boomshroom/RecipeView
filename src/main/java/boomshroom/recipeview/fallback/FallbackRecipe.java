@@ -16,15 +16,15 @@ public class FallbackRecipe<T extends IRecipe> implements Recipe {
 
     protected final T wrapped;
 
-    public FallbackRecipe(T wrapped){
+    public FallbackRecipe(T wrapped) {
         this.wrapped = wrapped;
     }
 
     @Override
     public List<ItemType> getResultTypes() {
         ItemStack itemStack = (org.spongepowered.api.item.inventory.ItemStack) (Object) wrapped.getRecipeOutput();
-        if (itemStack == null){
-            RecipeView.getStaticLogger().error("Null output to recipe: "+ String.valueOf(wrapped));
+        if (itemStack == null) {
+            RecipeView.getStaticLogger().error("Null output to recipe: " + String.valueOf(wrapped));
             return Collections.emptyList();
         }
         List<ItemType> list = new ArrayList<>();
@@ -40,6 +40,6 @@ public class FallbackRecipe<T extends IRecipe> implements Recipe {
 
     @Override
     public Optional<List<ItemStack>> getResults(GridInventory grid) {
-        return null;
+        return Optional.empty();
     }
 }

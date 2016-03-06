@@ -8,14 +8,10 @@ import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.item.recipe.ShapelessRecipe;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-public class FallbackRecipeRegistry implements RecipeRegistry{
+public class FallbackRecipeRegistry implements RecipeRegistry {
 
     private Set<Recipe> recipes;
 
@@ -30,16 +26,16 @@ public class FallbackRecipeRegistry implements RecipeRegistry{
     }
 
     @Override
-    public Set<Recipe> getRecipes(){
+    public Set<Recipe> getRecipes() {
         if (recipes == null) {
             recipes = new HashSet<>();
             for (IRecipe irecipe : CraftingManager.getInstance().getRecipeList()) {
-                if (irecipe instanceof ShapedRecipes){
+                if (irecipe instanceof ShapedRecipes) {
                     recipes.add(new FallbackShapedRecipe((ShapedRecipes) irecipe));
-                }else if (irecipe instanceof ShapelessRecipe) {
-                    recipes.add(new FallbackShapelessRecipe((ShapelessRecipes)irecipe));
-                }else{
-                    recipes.add(new FallbackRecipe(irecipe));
+                } else if (irecipe instanceof ShapelessRecipe) {
+                    recipes.add(new FallbackShapelessRecipe((ShapelessRecipes) irecipe));
+                } else {
+                    recipes.add(new FallbackRecipe<>(irecipe));
                 }
             }
         }

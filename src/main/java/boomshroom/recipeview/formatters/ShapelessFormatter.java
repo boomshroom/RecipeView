@@ -11,18 +11,18 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public class ShapelessFormatter implements RecipeFormatter{
+public class ShapelessFormatter implements RecipeFormatter {
     @Override
     public Text formatRecipe(Recipe recipe, Locale locale) {
-        ShapelessRecipe shapelessRecipe = (ShapelessRecipe)recipe;
+        ShapelessRecipe shapelessRecipe = (ShapelessRecipe) recipe;
         Text.Builder text = Text.builder("Shapeless Recipe\n\n");
         Map<ItemType, ItemStack> ingredients = new HashMap<>(shapelessRecipe.getIngredients().size());
 
-        for (ItemStack stack: shapelessRecipe.getIngredients()){
+        for (ItemStack stack : shapelessRecipe.getIngredients()) {
             RecipeView.getStaticLogger().info(stack.toString());
-            if (ingredients.containsKey(stack.getItem())){
-                ingredients.get(stack.getItem()).setQuantity(ingredients.get(stack.getItem()).getQuantity()+stack.getQuantity());
-            }else{
+            if (ingredients.containsKey(stack.getItem())) {
+                ingredients.get(stack.getItem()).setQuantity(ingredients.get(stack.getItem()).getQuantity() + stack.getQuantity());
+            } else {
                 ingredients.put(stack.getItem(), stack);
             }
         }

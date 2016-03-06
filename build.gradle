@@ -36,6 +36,7 @@ repositories {
 minecraft {
     version = '1.8.9'
     mappings = 'snapshot_20160204'
+    atSource sourceSets.main
 }
 
 dependencies {
@@ -44,4 +45,10 @@ dependencies {
 
 reobf.jar {
     mappingType = 'SEARGE'
+}
+
+jar {
+    manifest {
+        attributes('FMLAT': 'recipes_at.cfg')
+    }
 }

@@ -4,9 +4,15 @@ import boomshroom.recipeview.formatters.RecipeFormatter;
 import boomshroom.recipeview.formatters.ShapedFormatter;
 import boomshroom.recipeview.formatters.ShapelessFormatter;
 import com.google.inject.Inject;
+import org.slf4j.Logger;
 import org.spongepowered.api.CatalogTypes;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
@@ -16,17 +22,9 @@ import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.ShapedRecipe;
 import org.spongepowered.api.item.recipe.ShapelessRecipe;
 import org.spongepowered.api.plugin.Plugin;
-
-import org.slf4j.Logger;
 import org.spongepowered.api.scheduler.SpongeExecutorService.SpongeFuture;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -35,47 +33,44 @@ import java.util.concurrent.TimeUnit;
 @Plugin(id = "recipeview", name = "Recipe Viewer", version = "0.1")
 public class RecipeView {
 
-    public RecipeView(){
-        if (instance == null) {
-            instance = this;
-        }
-    }
-
     private static RecipeView instance;
-
-    public static RecipeView getInstance(){
-        return instance;
-    }
-
     @Inject
     private Logger logger;
     @Inject
     private Game game;
     private PaginationService paginationService = Sponge.getServiceManager().provide(PaginationService.class).get();
     private SpongeFuture<RecipeTable> buildTask;
-    private RecipeTable table;
+    private Map<Class<? extends Recipe>, RecipeFormatter> formatters = new HashMap<>();
+    public RecipeView() {
+        if (instance == null) {
+            instance = this;
+        }
+    }
+    //private RecipeTable table;
 
-    public Logger getLogger(){
-        return logger;
+    public static RecipeView getInstance() {
+        return instance;
     }
 
-    public Game getGame(){
-        return game;
-    }
-
-    public static Logger getStaticLogger(){
+    public static Logger getStaticLogger() {
         return getInstance().getLogger();
     }
 
-    private Map<Class<? extends Recipe>, RecipeFormatter> formatters = new HashMap<>();
+    public Logger getLogger() {
+        return logger;
+    }
 
-    public <T extends Recipe>void registerFormatter(Class<T> cl, @NonnullByDefault RecipeFormatter formatter){
+    public Game getGame() {
+        return game;
+    }
+
+    public <T extends Recipe> void registerFormatter(Class<T> cl, RecipeFormatter formatter) {
         formatters.put(cl, formatter);
     }
 
-    public <T extends Recipe>Optional<RecipeFormatter> getFormatter(Recipe r){
-        for(Class cl: formatters.keySet()){
-            if (cl.isInstance(r)){
+    public Optional<RecipeFormatter> getFormatter(Recipe r) {
+        for (Class cl : formatters.keySet()) {
+            if (cl.isInstance(r)) {
                 return Optional.of(formatters.get(cl));
             }
         }
@@ -83,7 +78,7 @@ public class RecipeView {
     }
 
     @Listener
-    public void preInit(GamePreInitializationEvent event){
+    public void preInit(GamePreInitializationEvent event) {
         registerFormatter(ShapedRecipe.class, new ShapedFormatter());
         registerFormatter(ShapelessRecipe.class, new ShapelessFormatter());
     }
@@ -93,7 +88,7 @@ public class RecipeView {
         //paginationService.setPaginationCalculator(CommandSource.class, paginationService.getFixedLinesCalculator(1));
 
         CommandSpec cmd = CommandSpec.builder()
-                .description((Text) Text.of("Prints the recipe of an item to the chat."))
+                .description(Text.of("Prints the recipe of an item to the chat."))
                 .arguments(GenericArguments.onlyOne(GenericArguments.catalogedElement(Text.of("item"), CatalogTypes.ITEM_TYPE)))
                 .executor((CommandSource src, CommandContext args) -> {
                     try {
@@ -108,7 +103,7 @@ public class RecipeView {
                             return CommandResult.empty();
                         }
 
-                    } catch (ExecutionException|InterruptedException e) {
+                    } catch (ExecutionException | InterruptedException e) {
                         e.printStackTrace();
                         return CommandResult.empty();
                     }
@@ -118,7 +113,7 @@ public class RecipeView {
     }
 
     @Listener
-    public void postInit(GamePostInitializationEvent event){
+    public void postInit(GamePostInitializationEvent event) {
         buildTask = game.getScheduler().createAsyncExecutor(this).schedule(new RecipeTable(), 0, TimeUnit.SECONDS);
         /*try {
             table = new RecipeTable().call();
