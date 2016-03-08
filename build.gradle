@@ -40,7 +40,7 @@ minecraft {
 }
 
 dependencies {
-    compile 'org.spongepowered:spongeapi:3.0.0'
+    compile 'org.spongepowered:spongeapi:4.0.1'
 }
 
 reobf.jar {

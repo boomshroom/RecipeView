@@ -30,7 +30,7 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-@Plugin(id = "recipeview", name = "Recipe Viewer", version = "0.1")
+@Plugin(id = "boomshroom.recipeview", name = "Recipe Viewer", version = "0.1", description = "A simple chat based recipe viewer.")
 public class RecipeView {
 
     private static RecipeView instance;
@@ -96,7 +96,16 @@ public class RecipeView {
                         Locale locale = src.getLocale();
                         Optional<List<Text>> recipes = buildTask.get().getRecipes(type, locale);
                         if (recipes.isPresent()) {
-                            paginationService.builder().contents(recipes.get()).title(Text.of("Recipes for ", type.getTranslation().get(locale))).sendTo(src);
+                            try {
+                                if (Sponge.getPlatform().getApi().getVersion().orElse("").startsWith("4.")) {
+                                    paginationService.builder().contents(recipes.get()).title(Text.of("Recipes for ", type.getTranslation())).linesPerPage(1).sendTo(src);
+                                } else {
+                                    src.sendMessages(recipes.get());
+                                }
+                            }catch(NoSuchMethodError e){
+                                // Not on version 4.X
+                                src.sendMessages(recipes.get());
+                            }
                             return CommandResult.success();
                         } else {
                             src.sendMessage(Text.of("There are no recipes for ", type.getTranslation()));
